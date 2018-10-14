@@ -58,7 +58,7 @@ int main()
             flag[back_ground] = true;
             myArgv[myArgc-1] = NULL;
         }
-
+        
         process_run(flag, myArgc, myArgv, filename, 0);
         // pid_t pid = fork();
         // if(pid < 0)
