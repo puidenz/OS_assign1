@@ -10,26 +10,41 @@
 
 using namespace std;
 
-int parse_argv(stringstream &in_command, char** &argv);
+int parse_argv(vector<string> &in_command, char** &argv);
 void sig_handle(int sig);
 
 int main()
 {
     
     while(true){
-        string input, output;
-        stringstream ss;
+        string input;       //store the input line
+        stringstream ss;    //stringstream for string handling
         
-        char **myArgv;
-        int myArgc;
-        bool back_ground = false;
-        cout << ">";
-        
-        getline(cin, input);
+        char **myArgv;      //arguments array
+        int myArgc;         //number of arguments
+        string filename;	//store filename for redirection
+		bool back_ground = false;          				 //flag for idicatiing if back_ground mode "&"
+        bool redirection = false;
+		
+
+		cout << ">";
+		getline(cin, input);
         ss << input;
         
-        myArgc = parse_argv(ss, myArgv);    //get argument!
-        if(strcmp(myArgv[myArgc-1], "&") == 0){        //check if & exit
+        vector<string> tmp;
+        string tmp_s;
+        tmp.reserve(10);
+
+        while(ss >> tmp_s){
+			if(tmp_s == ">"){
+				redirection = true;
+				ss >> filename;
+			}
+            tmp.push_back(tmp_s);
+        }
+
+        myArgc = parse_argv(tmp, myArgv);    			//get argument!
+        if(strcmp(myArgv[myArgc-1], "&") == 0){			//check if & exit
             back_ground = true;
             myArgv[myArgc-1] = NULL;
         }
@@ -58,23 +73,23 @@ int main()
     return 0;
 }
 
-int parse_argv(stringstream &in_command, char** &argv){
-    vector<string> tmp;
-    string tmp_s;
+int parse_argv(vector<string> &in_command, char** &argv){
+    // vector<string> tmp;
+    // string tmp_s;
 
-    tmp.reserve(10);
+    // tmp.reserve(10);
 
-    while(in_command >> tmp_s){
-        tmp.push_back(tmp_s);
+    // while(in_command >> tmp_s){
+    //     tmp.push_back(tmp_s);
+    // }
+
+    argv = new char* [in_command.size()+1];        //dynamic allocate true arugments array
+    for(int i=0; i<in_command.size(); i++){
+        argv[i] = new char[strlen(in_command[i].c_str())];
+        strcpy(argv[i], in_command[i].c_str());
     }
-
-    argv = new char* [tmp.size()+1];        //dynamic allocate true arugments array
-    for(int i=0; i<tmp.size(); i++){
-        argv[i] = new char[strlen(tmp[i].c_str())];
-        strcpy(argv[i], tmp[i].c_str());
-    }
-    argv[tmp.size()] = NULL;                //argv should terminated by NULL
-    return tmp.size();
+    argv[in_command.size()] = NULL;                //argv should terminated by NULL
+    return in_command.size();
 }
 
 void sig_handle(int sig){
